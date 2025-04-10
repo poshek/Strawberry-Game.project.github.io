@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tap the Strawberry</title>
+  <script src = "TweenMax.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/winwheel@2.7.0/Winwheel.min.js"></script>
+  <script src="Winwheel.js"></script>
+  <style>
+    body {
+      font-family: 'Montserrat', sans-serif;
+      overflow: hidden;
+      margin: 0;
+      position: relative;
+      background-image: url("PIPI.JPG");
+      background-size: cover;
+      background-position: center;
+    }
+
+    h1 {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    #counter, #fashion-counter {
+      font-size: 2rem;
+      margin: 5px;
+      text-align: center;
+    }
+
+    #message {
+      font-size: 1.5rem;
+      text-align: center;
+      color: #ff1493;
+      height: 2em;
+      
+    }
+
+    #main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    img#strawberry {
+      width: 150px;
+      max-width: 80vw;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      outline:none;
+      border:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    img#strawberry:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
+      outline:none;
+      border:none;
+    }
+
+    img#strawberry:active {
+      transform: scale(0.95);
+      box-shadow: none;
+      outline:none;
+      border:none;
+    }
+
+    .falling-gift {
+      position: absolute;
+      top: -60px;
+      font-size: 2rem;
+      animation: fall 5s linear forwards;
+      z-index: 0;
+      cursor: pointer;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(110vh);
+        opacity: 0;
+      }
+    }
+
+    .button-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .game-btn {
+      padding: 10px 15px;
+      background-color: #ff69b4;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1rem;
+      width: 160px;
+       -webkit-tap-highlight-color: transparent;
+    }
+
+    .modal {
+      position: fixed;
+      top: 15%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      display: none;
+      z-index: 999;
+      max-width: 400px;
+    }
+
+    .shop-grid, .business-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .shop-item, .business-item {
+      background-color: #ffe4ec;
+      padding: 10px;
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+       -webkit-tap-highlight-color: transparent;
+    }
+
+    .buy-btn, .close-btn, .spin-now-btn {
+      margin-top: 10px;
+      background-color: #ff69b4;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #wheel-indicator {
+  position: relative;
+  top: 15px;
+  left: calc(50% - 10px);
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 20px solid black;
+  transform: rotate(180deg);
+  z-index: 10;
+    }
+
+    .particle {
+      position: absolute;
+      pointer-events: none;
+      width: 20px;
+      height: 20px;
+      background: url("Strawberry-PNG-Picture-removebg-preview.png") no-repeat center/contain;
+      animation: explode 0.6s ease-out forwards;
+    }
+
+    @keyframes explode {
+      to {
+        transform: translateY(-100px) scale(0);
+        opacity: 0;
+      }
+    }
+
+    #wheel-canvas {
+      display: block;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="main">
+    <h1>Tap the Strawberry!</h1>
+    <div id="counter">Strawberries: 0</div>
+    <div id="fashion-counter">Fashion Coins: 0</div>
+    <img id="strawberry" src="Strawberry-PNG-Picture-removebg-preview.png" alt="Strawberry" />
+    <div id="message"></div>
+  </div>
+
+  <div class="button-container">
+    <button class="game-btn" id="spin-btn">Spin (200)</button>
+    <button class="game-btn" id="shop-btn">Shop</button>
+    <button class="game-btn" id="business-btn">Business</button>
+  </div>
+
+  <div class="modal" id="shop">
+    <h2>Strawberry Skins</h2>
+    <div class="shop-grid" id="shop-grid"></div>
+    <button class="close-btn" onclick="document.getElementById('shop').style.display='none'">Close</button>
+  </div>
+
+  <div class="modal" id="business-modal">
+    <h2>Start Your Berry Empire!</h2>
+    <div class="business-grid" id="business-grid"></div>
+    <button class="close-btn" onclick="document.getElementById('business-modal').style.display='none'">Close</button>
+  </div>
+
+  <div class="modal" id="spin-modal">
+    <h2>Mellstroy Casino</h2>
+    <p id="spin-status">Cost: <strong>200 strawberries</strong></p>
+    <div id="wheel-indicator"></div>
+    
+    <canvas id="wheel-canvas" width="300" height="300"></canvas>
+    <button class="spin-now-btn" onclick="startSpin()">Spin Now!</button>
+    <button class="close-btn" onclick="document.getElementById('spin-modal').style.display='none'">Close</button>
+    <div id="prize-display" style="text-align:center; margin-top:10px;"></div>
+    
+  </div>
+  
+  <script>
+    let strawberries = 0;
+    let fashionCoins = 0;
+    let businesses = [];
+    let strawberryImg = document.getElementById("strawberry");
+    let counter = document.getElementById("counter");
+    let fashionCounter = document.getElementById("fashion-counter");
+    let message = document.getElementById("message");
+
+    let currentSkin = "Strawberry-PNG-Picture-removebg-preview.png";
+
+    function updateCounters() {
+      counter.innerText = `Strawberries: ${strawberries}`;
+      fashionCounter.innerText = `Fashion Coins: ${fashionCoins}`;
+    }
+
+    strawberryImg.onclick = function (e) {
+      strawberries++;
+      updateCounters();
+      createParticle(e.clientX, e.clientY);
+    };
+
+    function createParticle(x, y) {
+      const particle = document.createElement("div");
+      particle.className = "particle";
+      particle.style.left = x + "px";
+      particle.style.top = y + "px";
+      document.body.appendChild(particle);
+      setTimeout(() => particle.remove(), 600);
+    }
+
+    function spawnGiftOrBomb() {
+      const isGift = Math.random() < 0.5;
+      const div = document.createElement("div");
+      div.className = "falling-gift";
+      div.style.left = Math.random() * 90 + "vw";
+      div.innerText = isGift ? "🎁" : "💣";
+      document.body.appendChild(div);
+      div.onclick = () => {
+        if (isGift) {
+          strawberries += 100;
+        } else {
+          strawberries = Math.max(0, strawberries - 100);
+        }
+        updateCounters();
+        div.remove();
+      };
+      setTimeout(() => div.remove(), 5000);
+    }
+    setInterval(spawnGiftOrBomb, Math.random() * 7000);
+
+    // Shop logic
+    const skins = [
+      { name: "Zombie", price: 450, image: "Zombie.jpg" },
+      { name: "Drip Berry", price: 1000, image: "Drip.jpg" },
+    ];
+
+    const shopGrid = document.getElementById("shop-grid");
+    skins.forEach((skin) => {
+      const div = document.createElement("div");
+      div.className = "shop-item";
+      div.innerHTML = `<strong>${skin.name}</strong><br>Cost: ${skin.price}<br><img src="${skin.image}" width="50"/><br><button class="buy-btn">Buy</button>`;
+      div.querySelector("button").onclick = () => {
+        if (strawberries >= skin.price) {
+          strawberries -= skin.price;
+          strawberryImg.src = skin.image;
+          currentSkin = skin.image;
+          updateCounters();
+        }
+      };
+      shopGrid.appendChild(div);
+    });
+
+    // Business logic
+    const businessTypes = [
+      { name: "Berry Farm", cost: 250, income: 1 },
+      { name: "Jam Factory", cost: 750, income: 5 },
+      { name: "Berry Market", cost: 1500, income: 10 },
+      { name: "Smoothie Chain", cost: 3000, income: 25 },
+    ];
+
+    const businessGrid = document.getElementById("business-grid");
+    businessTypes.forEach((biz, index) => {
+      const div = document.createElement("div");
+      div.className = "business-item";
+      div.innerHTML = `<strong>${biz.name}</strong><br>Cost: ${biz.cost}<br>Earns: ${biz.income}/s<br><button class="buy-btn">Buy</button>`;
+      div.querySelector("button").onclick = () => {
+        if (strawberries >= biz.cost) {
+          strawberries -= biz.cost;
+          businesses.push(biz);
+          updateCounters();
+        }
+      };
+      businessGrid.appendChild(div);
+    });
+
+    setInterval(() => {
+      businesses.forEach((biz) => {
+        strawberries += biz.income;
+      });
+      updateCounters();
+    }, 1000);
+
+    // Wheel logic
+    const wheel = new Winwheel({
+      canvasId: "wheel-canvas",
+      numSegments: 8,
+      segments: [
+        { fillStyle: "#ff9999", text: "50" },
+        { fillStyle: "#ffcc99", text: "100" },
+        { fillStyle: "#99ff99", text: "150" },
+        { fillStyle: "#99ffff", text: "200" },
+        { fillStyle: "#ccccff", text: "Fashion Coin", textFillStyle: "#000" },
+        { fillStyle: "#ffccff", text: "100" },
+        { fillStyle: "#ccffcc", text: "50" },
+        { fillStyle: "#ff6666", text: "300" },
+      ],
+      animation: {
+        type: "spinToStop",
+        duration: 5,
+        spins: 8,
+        callbackFinished: alertPrize,
+      },
+      
+    });
+    
+
+    function startSpin() {
+      if (strawberries < 200) return;
+      strawberries -= 200;
+      updateCounters();
+      message.innerText = "Spinning...";
+      wheel.stopAnimation(false);
+      wheel.rotationAngle = 0;
+      wheel.startAnimation();
+    }
+
+    function alertPrize(indicatedSegment) {
+      const prize = indicatedSegment.text;
+      if (prize === "Fashion Coin") {
+        fashionCoins += 1;
+      } else {
+        strawberries += parseInt(prize);
+      }
+      updateCounters();
+      message.innerText = `You won: ${prize}!`;
+    }
+
+    // Buttons open modals
+    document.getElementById("shop-btn").onclick = () => {
+      document.getElementById("shop").style.display = "block";
+    };
+    document.getElementById("business-btn").onclick = () => {
+      document.getElementById("business-modal").style.display = "block";
+    };
+    document.getElementById("spin-btn").onclick = () => {
+      document.getElementById("spin-modal").style.display = "block";
+    };
+  </script>
+</body>
+</html>
