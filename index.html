@@ -274,6 +274,7 @@
     const skins = [
       { name: "Zombie", price: 450, image: "Zombie.jpg" },
       { name: "Drip Berry", price: 1000, image: "Drip.jpg" },
+      {name: "Nazar Berry",price:10000,image:"Bape.png"}
     ];
 
     const shopGrid = document.getElementById("shop-grid");
@@ -377,6 +378,12 @@
     document.getElementById("spin-btn").onclick = () => {
       document.getElementById("spin-modal").style.display = "block";
     };
+    window.addEventListener("orientationchange", function(){
+        screen.lockOrientation("portrait");
+
+    });
+
+
   </script>
 </body>
 </html>
